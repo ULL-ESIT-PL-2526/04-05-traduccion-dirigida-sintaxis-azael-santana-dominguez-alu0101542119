@@ -127,5 +127,37 @@ describe('Parser Tests', () => {
       expect(parse("7 - 5 - 1")).toBe(1);
     });
   });
-
+  describe('Comments handling (//)', () => {
+    test('should ignore comment at end of line', () => {
+      expect(parse("2 + 3 // comentario")).toBe(5);
+      expect(parse("10 * 2 // multiplicacion")).toBe(20);
+    });
+  
+    test('should ignore full line comment (invalid expression)', () => {
+      expect(() => parse("// solo comentario")).toThrow();
+    });
+  
+    test('should ignore comment after number', () => {
+      expect(parse("42 // numero")).toBe(42);
+    });
+  
+    test('should ignore comment in multiline input', () => {
+      expect(parse(`
+        2 + 3 // suma
+        + 4
+      `)).toBe(9);
+    });
+  
+    test('should ignore comment between tokens', () => {
+      expect(parse("2 + // comentario\n 3")).toBe(5);
+    });
+  
+    test('should handle multiple comments', () => {
+      expect(parse(`
+        1 + 2 // primero
+        + 3 // segundo
+        + 4
+      `)).toBe(10);
+    });
+  });
 });
