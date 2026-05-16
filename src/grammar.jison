@@ -3,10 +3,11 @@
 %%
 \s+                   { /* skip whitespace */; }
 \/\/.*    {/* skip comment */; }
-[0-9]\.[0-9]*((E-|e+|e-)[0-9]+)?    {return 'FLOAT'; }
+[0-9]+(\.[0-9]+)?([eE][-+]?[0-9]+)?    {return 'NUMBER'; }
 [0-9]+                { return 'NUMBER';       }
-"**"                  { return 'OP';           }
-[-+*/]                { return 'OP';           }
+"**"                  { return 'opow';           }
+[-+]                { return 'opad';           }
+[*/]                { return 'opmu';           }
 <<EOF>>               { return 'EOF';          }
 .                     { return 'INVALID';      }
 /lex
@@ -22,13 +23,27 @@ expressions
     ;
 
 expression
-    : expression OP term
-        { $$ = operate($OP, $expression, $term); }
-    | term
-        { $$ = $term; }
+    : expression opad multiplication
+        { $$ = operate($opad, $expression, $multiplication); }
+    | multiplication
+        { $$ = $multiplication; }
     ;
 
-term
+multiplication
+    : multiplication opmu potency
+        { $$ = operate($opmu, $multiplication, $ potency); }
+    | multiplication
+        { $$ = $multiplication; }
+    ;
+
+potency
+    : factor opow potency
+        { $$ = operate($opow, $factor, $potency); }
+    | factor
+        { $$ = $factor; }
+    :
+
+factor
     : NUMBER
         { $$ = Number(yytext); }
     ;

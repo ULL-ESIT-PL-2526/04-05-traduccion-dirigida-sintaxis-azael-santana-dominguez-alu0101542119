@@ -110,7 +110,6 @@ describe('Parser Tests', () => {
       expect(() => parse("3 +")).toThrow();
       expect(() => parse("+ 3")).toThrow();
       expect(() => parse("3 + + 4")).toThrow();
-      expect(() => parse("3.5")).toThrow(); // Only integers are supported
     });
 
     test('should handle incomplete expressions', () => {
@@ -158,6 +157,56 @@ describe('Parser Tests', () => {
         + 3 // segundo
         + 4
       `)).toBe(10);
+    });
+  });
+
+  describe('Floating point numbers', () => {
+    test('should parse integers', () => {
+      expect(parse("23")).toBe(23);
+      expect(parse("0")).toBe(0);
+    });
+  
+    test('should parse simple decimals', () => {
+      expect(parse("2.35")).toBe(2.35);
+      expect(parse("0.5")).toBe(0.5);
+    });
+  
+    test('should parse scientific notation (lowercase e)', () => {
+      expect(parse("2.35e3")).toBe(2350);
+      expect(parse("2.35e-3")).toBeCloseTo(0.00235);
+      expect(parse("2.35e+3")).toBe(2350);
+    });
+  
+    test('should parse scientific notation (uppercase E)', () => {
+      expect(parse("2.35E3")).toBe(2350);
+      expect(parse("2.35E-3")).toBeCloseTo(0.00235);
+      expect(parse("2.35E+3")).toBe(2350);
+    });
+  
+    test('should work inside expressions', () => {
+      expect(parse("2.5 + 2.5")).toBe(5);
+      expect(parse("1e3 + 1")).toBe(1001);
+      expect(parse("2.5 * 2")).toBe(5);
+    });
+  });
+
+  describe('Invalid floating point formats', () => {
+    test('should reject malformed decimals', () => {
+      expect(() => parse("2.")).toThrow();
+      expect(() => parse(".5")).toThrow();
+      expect(() => parse("2..5")).toThrow();
+    });
+  
+    test('should reject malformed scientific notation', () => {
+      expect(() => parse("2e")).toThrow();
+      expect(() => parse("2e+")).toThrow();
+      expect(() => parse("2e-")).toThrow();
+      expect(() => parse("2.3e++2")).toThrow();
+    });
+  
+    test('should reject invalid characters', () => {
+      expect(() => parse("2.3a")).toThrow();
+      expect(() => parse("abc")).toThrow();
     });
   });
 });
