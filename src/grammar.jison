@@ -4,6 +4,8 @@
 \s+                   { /* skip whitespace */; }
 \/\/.*    {/* skip comment */; }
 [0-9]+(\.[0-9]+)?([eE][-+]?[0-9]+)?    {return 'NUMBER'; }
+"("                   { return 'openbrack'; }
+")"                   { return 'closebrack'; }
 [0-9]+                { return 'NUMBER';       }
 "**"                  { return 'opow';           }
 [-+]                { return 'opad';           }
@@ -19,33 +21,35 @@
 
 expressions
     : expression EOF
-        { return $expression; }
+        { return $1; }
     ;
 
 expression
     : expression opad multiplication
-        { $$ = operate($opad, $expression, $multiplication); }
+        { $$ = operate($2, $1, $3); }
     | multiplication
-        { $$ = $multiplication; }
+        { $$ = $1; }
     ;
 
 multiplication
     : multiplication opmu potency
-        { $$ = operate($opmu, $multiplication, $ potency); }
-    | multiplication
-        { $$ = $multiplication; }
+        { $$ = operate($2, $1, $3); }
+    | potency
+        { $$ = $1; }
     ;
 
 potency
     : factor opow potency
-        { $$ = operate($opow, $factor, $potency); }
+        { $$ = operate($2, $1, $3); }
     | factor
-        { $$ = $factor; }
-    :
+        { $$ = $1; }
+    ;
 
 factor
     : NUMBER
         { $$ = Number(yytext); }
+    | openbrack expression closebrack
+        { $$ = $2; }
     ;
 %%
 

@@ -1,3 +1,5 @@
+const parse = require("../src/parser.js").parse;
+
 describe('Parser Failing Tests', () => {
   test('should handle multiplication and division before addition and subtraction', () => {
     expect(parse("2 + 3 * 4")).toBe(14); // 2 + (3 * 4) = 14
@@ -32,4 +34,28 @@ describe('Parser Failing Tests', () => {
     expect(parse("100 - 50 + 25")).toBe(75); // (100 - 50) + 25 = 75
     expect(parse("2 * 3 + 4 * 5")).toBe(26); // (2 * 3) + (4 * 5) = 26
   });
+});
+
+describe('Parentheses Tests', () => {
+    test('should handle simple parentheses', () => {
+        expect(parse("(2 + 3)")).toBe(5);
+        expect(parse("(10 - 4)")).toBe(6);
+    });
+
+    test('should override precedence with parentheses', () => {
+        expect(parse("(2 + 3) * 4")).toBe(20);   // sin paréntesis sería 14
+        expect(parse("2 * (3 + 4)")).toBe(14);   // sin paréntesis sería 10
+        expect(parse("(10 - 6) / 2")).toBe(2);   // sin paréntesis sería 7
+    });
+
+    test('should handle nested parentheses', () => {
+        expect(parse("((2 + 3))")).toBe(5);
+        expect(parse("(2 + (3 * 4))")).toBe(14);
+        expect(parse("((2 + 3) * (4 - 1))")).toBe(15);
+    });
+
+    test('should handle parentheses with exponentiation', () => {
+        expect(parse("(2 + 1) ** 2")).toBe(9);    // 3 ** 2 = 9
+        expect(parse("2 ** (1 + 2)")).toBe(8);    // 2 ** 3 = 8
+    });
 });
